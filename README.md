@@ -52,7 +52,7 @@ def _forward(self, x, context=None):
 Or, you can just modify the torch library as magnusviri suggested in his [repo](https://github.com/magnusviri/stable-diffusion/tree/apple-silicon-mps-support).
 
 Finally
-=====
+----
 ```bash
 python scripts/txt2img.py --prompt "a photograph of an astronaut riding a horse" --plms --n_samples 1 --n_rows 1 --n_iter 1
 ```
@@ -60,6 +60,8 @@ python scripts/txt2img.py --prompt "a photograph of an astronaut riding a horse"
 
 
 **Thanks all for finding ways to make standard-diffusion functional in Apple Silicon macs.**
+
+
 
 Troubleshootings
 =============
