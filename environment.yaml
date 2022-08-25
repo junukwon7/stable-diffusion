@@ -1,18 +1,17 @@
 name: ldm
 channels:
-  - pytorch
+  - pytorch-nightly
   - defaults
 dependencies:
-  - python=3.8.5
-  - pip=20.3
-  - cudatoolkit=11.3
-  - pytorch=1.11.0
-  - torchvision=0.12.0
-  - numpy=1.19.2
+  - python=3.10.4
+  - pip=22.1.2
+  - pytorch
+  - torchvision
+  - numpy=1.23.1
   - pip:
-    - albumentations==0.4.3
+    - albumentations==0.4.6
     - diffusers
-    - opencv-python==4.1.2.30
+    - opencv-python==4.6.0.66
     - pudb==2019.2
     - invisible-watermark
     - imageio==2.9.0
