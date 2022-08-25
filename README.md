@@ -1,3 +1,104 @@
+How to do it
+=========
+
+When using Einanoa's repo
+---------------------------
+```bash
+git clone https://github.com/einanao/stable-diffusion.git
+cd stable-diffusion
+git checkout apple-silicon
+
+mkdir -p models/ldm/stable-diffusion-v1/
+ln -s /path/to/ckpt/sd-v1-1.ckpt models/ldm/stable-diffusion-v1/model.ckpt
+
+conda create -n ldm python=3.8
+conda activate ldm
+
+conda install pytorch torchvision torchaudio -c pytorch-nightly
+pip install kornia albumentations opencv-python pudb imageio imageio-ffmpeg pytorch-lightning omegaconf test-tube streamlit einops torch-fidelity transformers
+pip install -e git+https://github.com/CompVis/taming-transformers.git@master#egg=taming-transformers
+pip install -e git+https://github.com/openai/CLIP.git@main#egg=clip
+pip install -e .
+```
+
+When using Magnusviri's repo
+------------------------------
+```bash
+git clone https://github.com/magnusviri/stable-diffusion
+cd stable-diffusion
+git checkout apple-silicon-mps-support
+
+mkdir -p models/ldm/stable-diffusion-v1/
+ln -s /path/to/ckpt/sd-v1-1.ckpt models/ldm/stable-diffusion-v1/model.ckpt
+
+conda env create -f environment-mac.yaml
+conda activate ldm
+```
+Then, as einanao suggested,
+Append ```.contiguous()``` at [ldm/models/diffusion/plms.py#L27](https://github.com/magnusviri/stable-diffusion/blob/6be63b5bbe95f04ad480e172d40994ecbe242b21/ldm/models/diffusion/plms.py#L27)
+So it would look like
+ ```diff
+-        attr = attr.to(torch.float32).to(torch.device(self.device_available))
++        attr = attr.to(torch.float32).to(torch.device(self.device_available)).contiguous()
+```
+Append new line ```x = x.contiguous()``` after [ldm/modules/attention.py#L211](https://github.com/magnusviri/stable-diffusion/blob/6be63b5bbe95f04ad480e172d40994ecbe242b21/ldm/modules/attention.py#L211) 
+So it would look like
+```diff
+def _forward(self, x, context=None):
++       x = x.contiguous()
+        x = self.attn1(self.norm1(x)) + x
+```
+
+Or, you can just modify the torch library as magnusviri suggested in his [repo](https://github.com/magnusviri/stable-diffusion/tree/apple-silicon-mps-support).
+
+Finally
+=====
+```bash
+python scripts/txt2img.py --prompt "a photograph of an astronaut riding a horse" --plms --n_samples 1 --n_rows 1 --n_iter 1
+```
+
+
+
+**Thanks all for finding ways to make standard-diffusion functional in Apple Silicon macs.**
+
+Troubleshootings
+=============
+
+Could not build wheels for tokenizers
+------
+```
+ERROR: Could not build wheels for tokenizers, which is required to install pyproject.toml-based projects
+```
+Install the Rust Compiler and the issue shall be resolved. Rust is required in order to build wheel for 
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
+
+ModuleNotFoundError: No module named 'imwatermark'
+-----
+Just remove the watermark generating part in ```txt2img.py```
+
+MPSNDArray
+-----
+```
+[MPSNDArray / MPSTemporaryNDArray initWithDevice:descriptor:] Error: product of dimension sizes > 2**31'
+```
+Reduce width and height in order to lower memory consumption
+
+RuntimeError
+-----
+```
+RuntimeError: view size is not compatible with input tensor's size and stride (at least one dimension spans across two contiguous subspaces). Use .reshape(...) instead.
+```
+Add ```.contiguous()``` as mentioned above
+
+
+
+
+If it still doesn't work, try both [einanao's](https://github.com/einanao/stable-diffusion/tree/apple-silicon) and [magnusviri's](https://github.com/magnusviri/stable-diffusion/tree/apple-silicon-mps-support).
+
+
+
 # Stable Diffusion
 *Stable Diffusion was made possible thanks to a collaboration with [Stability AI](https://stability.ai/) and [Runway](https://runwayml.com/) and builds upon our previous work:*
 
