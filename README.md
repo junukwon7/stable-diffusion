@@ -1,4 +1,4 @@
-How to do it
+Stable Diffusion for Apple Silicon
 =========
 
 When using Einanoa's repo
