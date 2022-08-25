@@ -33,6 +33,15 @@ DATABASES = [
 ]
 
 
+def get_device():
+    if(torch.cuda.is_available()):
+        return 'cuda'
+    elif(torch.backends.mps.is_available()):
+        return 'mps'
+    else:
+        return 'cpu'
+
+
 def chunk(it, size):
     it = iter(it)
     return iter(lambda: tuple(islice(it, size)), ())
@@ -53,7 +62,7 @@ def load_model_from_config(config, ckpt, verbose=False):
         print("unexpected keys:")
         print(u)
 
-    model.cuda()
+    model.to(get_device())
     model.eval()
     return model
 
@@ -122,8 +131,7 @@ class Searcher(object):
 
     def load_retriever(self, version='ViT-L/14', ):
         model = FrozenClipImageEmbedder(model=version)
-        if torch.cuda.is_available():
-            model.cuda()
+        model.to(get_device())
         model.eval()
         return model
 
@@ -309,7 +317,7 @@ if __name__ == "__main__":
     config = OmegaConf.load(f"{opt.config}")
     model = load_model_from_config(config, f"{opt.ckpt}")
 
-    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+    device = torch.device(get_device())
     model = model.to(device)
 
     clip_text_encoder = FrozenCLIPTextEmbedder(opt.clip_type).to(device)
@@ -358,7 +366,7 @@ if __name__ == "__main__":
                     uc = None
                     if searcher is not None:
                         nn_dict = searcher(c, opt.knn)
-                        c = torch.cat([c, torch.from_numpy(nn_dict['nn_embeddings']).cuda()], dim=1)
+                        c = torch.cat([c, torch.from_numpy(nn_dict['nn_embeddings']).to(device)], dim=1)
                     if opt.scale != 1.0:
                         uc = torch.zeros_like(c)
                     if isinstance(prompts, tuple):
