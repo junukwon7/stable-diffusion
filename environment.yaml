@@ -3,7 +3,7 @@ channels:
   - pytorch-nightly
   - defaults
 dependencies:
-  - python=3.10.4
+  - python=3.8.5
   - pip=22.1.2
   - pytorch
   - torchvision
