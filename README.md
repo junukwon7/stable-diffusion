@@ -31,6 +31,7 @@ python scripts/txt2img.py --prompt "a photograph of an astronaut riding a horse"
 
 
 **Thanks all for finding ways to make standard-diffusion functional in Apple Silicon macs.**
+
 Especially @magnusviri and @einanao
 <br /><br /><br />
 
