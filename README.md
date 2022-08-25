@@ -1,66 +1,38 @@
 Stable Diffusion for Apple Silicon
 =========
 
-When using Einanoa's repo
+Instructions
 ---------------------------
 ```bash
-git clone https://github.com/einanao/stable-diffusion.git
+git clone https://github.com/junukwon7/stable-diffusion.git
 cd stable-diffusion
 git checkout apple-silicon
 
 mkdir -p models/ldm/stable-diffusion-v1/
 ln -s /path/to/ckpt/sd-v1-1.ckpt models/ldm/stable-diffusion-v1/model.ckpt
 
-conda create -n ldm python=3.8
-conda activate ldm
-
-conda install pytorch torchvision torchaudio -c pytorch-nightly
-pip install kornia albumentations opencv-python pudb imageio imageio-ffmpeg pytorch-lightning omegaconf test-tube streamlit einops torch-fidelity transformers
-pip install -e git+https://github.com/CompVis/taming-transformers.git@master#egg=taming-transformers
-pip install -e git+https://github.com/openai/CLIP.git@main#egg=clip
-pip install -e .
-```
-
-When using Magnusviri's repo
-------------------------------
-```bash
-git clone https://github.com/magnusviri/stable-diffusion
-cd stable-diffusion
-git checkout apple-silicon-mps-support
-
-mkdir -p models/ldm/stable-diffusion-v1/
-ln -s /path/to/ckpt/sd-v1-1.ckpt models/ldm/stable-diffusion-v1/model.ckpt
-
-conda env create -f environment-mac.yaml
+conda env create -f environment.yaml
 conda activate ldm
 ```
-Then, as einanao suggested,
-Append ```.contiguous()``` at [ldm/models/diffusion/plms.py#L27](https://github.com/magnusviri/stable-diffusion/blob/6be63b5bbe95f04ad480e172d40994ecbe242b21/ldm/models/diffusion/plms.py#L27)
-So it would look like
- ```diff
--        attr = attr.to(torch.float32).to(torch.device(self.device_available))
-+        attr = attr.to(torch.float32).to(torch.device(self.device_available)).contiguous()
-```
-Append new line ```x = x.contiguous()``` after [ldm/modules/attention.py#L211](https://github.com/magnusviri/stable-diffusion/blob/6be63b5bbe95f04ad480e172d40994ecbe242b21/ldm/modules/attention.py#L211) 
-So it would look like
-```diff
-def _forward(self, x, context=None):
-+       x = x.contiguous()
-        x = self.attn1(self.norm1(x)) + x
-```
 
-Or, you can just modify the torch library as magnusviri suggested in his [repo](https://github.com/magnusviri/stable-diffusion/tree/apple-silicon-mps-support).
+
+
+
+
+<br />
 
 Finally
 ----
 ```bash
 python scripts/txt2img.py --prompt "a photograph of an astronaut riding a horse" --plms --n_samples 1 --n_rows 1 --n_iter 1
 ```
+<br /><br /><br />
 
 
 
 **Thanks all for finding ways to make standard-diffusion functional in Apple Silicon macs.**
-
+Especially @magnusviri and @einanao
+<br /><br /><br />
 
 
 Troubleshootings
@@ -101,6 +73,7 @@ If it still doesn't work, try both [einanao's](https://github.com/einanao/stable
 
 
 
+<br /><br /><br />
 # Stable Diffusion
 *Stable Diffusion was made possible thanks to a collaboration with [Stability AI](https://stability.ai/) and [Runway](https://runwayml.com/) and builds upon our previous work:*
 
